@@ -1,3 +1,3 @@
-# Go Projects
+# Projects
 
 This repository stores codes from project-based learning.
