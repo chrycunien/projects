@@ -9,7 +9,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/docker/docker/client"
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
 )
@@ -24,11 +23,7 @@ func createContainer() (*task.Docker, *task.DockerResult) {
 		},
 	}
 
-	dc, _ := client.NewClientWithOpts(client.FromEnv)
-	d := task.Docker{
-		Client: dc,
-		Config: c,
-	}
+	d := task.NewDocker(&c)
 
 	result := d.Run()
 	if result.Error != nil {

@@ -27,6 +27,7 @@ func (w *Worker) StartTask() {
 	fmt.Println("I will start a task!")
 }
 
-func (w *Worker) StopTask() {
-	fmt.Println("I will stop a task!")
+func (w *Worker) StopTask(t task.Task) *task.DockerResult {
+	config := task.NewConfig(&t)
+
 }
