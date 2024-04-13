@@ -123,14 +123,12 @@ impl ActionKV {
             let maybe_kv = ActionKV::process_record(&mut f);
             let kv = match maybe_kv {
                 Ok(kv) => kv,
-                Err(err) => {
-                    match err.kind() {
-                        io::ErrorKind::UnexpectedEof => {
-                            break;
-                        }
-                        _ => return Err(err),
+                Err(err) => match err.kind() {
+                    io::ErrorKind::UnexpectedEof => {
+                        break;
                     }
-                }
+                    _ => return Err(err),
+                },
             };
 
             if kv.key == target {

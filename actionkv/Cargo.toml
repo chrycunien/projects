@@ -1,11 +1,12 @@
 [package]
 name = "actionkv"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 
 [dependencies]
-byteorder = "1.2"
-crc = "1.8.1"
+bincode = "1"
+byteorder = "1"
+crc = "1"
 serde = "1"
 serde_derive = "1"
 
@@ -16,3 +17,7 @@ path = "src/lib.rs"
 [[bin]]
 name = "akv_mem"
 path = "src/akv_mem.rs"
+
+[[bin]]
+name = "akv_disk"
+path = "src/akv_disk.rs"
