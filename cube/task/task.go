@@ -17,6 +17,7 @@ import (
 
 type Task struct {
 	ID            uuid.UUID
+	ContainerID   string
 	Name          string
 	State         State
 	Image         string
@@ -50,7 +51,6 @@ type Config struct {
 	Disk          int64
 	Env           []string
 	RestartPolicy string
-	Runtime       Runtime
 }
 
 func NewConfig(t *Task) *Config {
@@ -63,10 +63,6 @@ func NewConfig(t *Task) *Config {
 		Disk:          t.Disk,
 		RestartPolicy: t.RestartPolicy,
 	}
-}
-
-type Runtime struct {
-	ContainerID string
 }
 
 type Docker struct {
@@ -135,9 +131,6 @@ func (d *Docker) Run() DockerResult {
 		return DockerResult{Error: err}
 	}
 
-	// question?
-	d.Config.Runtime.ContainerID = resp.ID
-
 	out, err := d.Client.ContainerLogs(ctx, resp.ID, container.LogsOptions{ShowStdout: true, ShowStderr: true})
 	if err != nil {
 		log.Printf("Error getting logs for container %s: %v\n", resp.ID, err)
@@ -147,6 +140,7 @@ func (d *Docker) Run() DockerResult {
 	stdcopy.StdCopy(os.Stdout, os.Stderr, out)
 
 	return DockerResult{
+		Error:       nil,
 		ContainerID: resp.ID,
 		Action:      "start",
 		Result:      "success",

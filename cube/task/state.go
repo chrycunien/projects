@@ -12,7 +12,7 @@ const (
 
 var stateTransitionMap = map[State][]State{
 	Pending:   []State{Scheduled},
-	Scheduled: []State{Running, Failed},
+	Scheduled: []State{Scheduled, Running, Failed},
 	Running:   []State{Running, Completed, Failed},
 	Completed: []State{},
 	Failed:    []State{},
@@ -25,4 +25,8 @@ func Contains(states []State, state State) bool {
 		}
 	}
 	return false
+}
+
+func ValidStateTransision(src, dst State) bool {
+	return Contains(stateTransitionMap[src], dst)
 }
