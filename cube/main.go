@@ -4,10 +4,10 @@ import (
 	"cube/task"
 	"cube/worker"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
 	"time"
-
-	"github.com/golang-collections/collections/queue"
-	"github.com/google/uuid"
 )
 
 func createContainer() (*task.Docker, *task.DockerResult) {
@@ -43,37 +43,33 @@ func stopContainer(d *task.Docker, id string) *task.DockerResult {
 	return &result
 }
 
+func runTasks(w *worker.Worker) {
+	for {
+		if w.Queue.Len() != 0 {
+			result := w.RunTask()
+			if result.Error != nil {
+				log.Printf("Error running task: %v\n", result.Error)
+			}
+		} else {
+			log.Println("No task to process currently!")
+		}
+
+		log.Println("Sleeping for 10 seconds.")
+		time.Sleep(10 * time.Second)
+	}
+}
+
+// CUBE_HOST=localhost CUBE_PORT=5555 DOCKER_API_VERSION=1.44 go run main.go
+
 func main() {
-	db := map[uuid.UUID]*task.Task{}
-	w := worker.Worker{
-		Queue: *queue.New(),
-		Db:    db,
-	}
+	host := os.Getenv("CUBE_HOST")
+	port, _ := strconv.Atoi(os.Getenv("CUBE_PORT"))
 
-	t := task.Task{
-		ID:    uuid.New(),
-		Name:  "test-container-1",
-		State: task.Scheduled,
-		Image: "nginx",
-	}
+	fmt.Println("Starting Cube Worker...")
 
-	fmt.Println("Starting Task!")
-	w.AddTask(t)
-	result := w.RunTask()
-	if result.Error != nil {
-		panic(result.Error)
-	}
+	w := worker.NewWorker()
+	api := worker.NewApi(host, port, w)
 
-	t.ContainerID = result.ContainerID
-	fmt.Printf("task %s is running in container %s\n", t.ID, t.ContainerID)
-	fmt.Println("Sleeping...")
-	time.Sleep(30 * time.Second)
-
-	fmt.Printf("Stopping container %s\n", t.ContainerID)
-	t.State = task.Completed
-	w.AddTask(t)
-	result = w.RunTask()
-	if result.Error != nil {
-		panic(result.Error)
-	}
+	go runTasks(w)
+	api.Start()
 }

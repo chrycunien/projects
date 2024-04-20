@@ -11,11 +11,26 @@ import (
 	"github.com/google/uuid"
 )
 
+func NewWorker() *Worker {
+	return &Worker{
+		Queue: *queue.New(),
+		Db:    make(map[uuid.UUID]*task.Task),
+	}
+}
+
 type Worker struct {
 	Name      string
 	Queue     queue.Queue
 	Db        map[uuid.UUID]*task.Task
 	TaskCount int
+}
+
+func (w *Worker) GetTasks() []*task.Task {
+	tasks := []*task.Task{}
+	for _, t := range w.Db {
+		tasks = append(tasks, t)
+	}
+	return tasks
 }
 
 func (w *Worker) AddTask(t task.Task) {
