@@ -20,3 +20,5 @@ docker ps --format "table {{.ID}}\t{{.Image}}\t{{.Status}}\t{{.Names}}"
 curl -v --request DELETE "localhost:5555/tasks/266592cd-960d-4091-981c-8c25c44b1018"
 
 curl -v localhost:5555/tasks
+
+curl localhost:5555/stats | jq .

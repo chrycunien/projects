@@ -36,6 +36,9 @@ func (a *Api) initRounter() {
 			r.Delete("/", a.StopTaskHandler)
 		})
 	})
+	a.Router.Route("/stats", func(r chi.Router) {
+		r.Get("/", a.GetStatsHandler)
+	})
 }
 
 func (a *Api) Start() {

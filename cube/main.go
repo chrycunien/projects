@@ -71,5 +71,6 @@ func main() {
 	api := worker.NewApi(host, port, w)
 
 	go runTasks(w)
+	go w.CollectStats()
 	api.Start()
 }
