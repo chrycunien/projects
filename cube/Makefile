@@ -1,4 +1,12 @@
-.PHONY: run
 
+.PHONY: build
+build:
+	docker compose build
+
+.PHONY: run
 run:
-	DOCKER_API_VERSION=1.44 go run main.go
+	docker compose up
+
+.PHONY: run-old
+run-old:
+	docker compose run -P cube

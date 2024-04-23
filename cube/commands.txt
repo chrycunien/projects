@@ -31,3 +31,15 @@ curl -v --request POST \
 localhost:5556/tasks
 
 curl localhost:5556/tasks | jq .
+
+docker run -p 7777:7777 --name echo timboring/echo-server:latest
+
+curl -X POST http://localhost:7777/ -d '{"Msg": "hello world"}'
+
+curl -v http://localhost:7777/health
+
+curl -v http://localhost:7777/healthfail
+
+curl -v -X POST localhost:5556/tasks -d @task1.json
+
+curl http://localhost:5556/tasks | jq .
