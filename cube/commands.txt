@@ -22,3 +22,12 @@ curl -v --request DELETE "localhost:5555/tasks/266592cd-960d-4091-981c-8c25c44b1
 curl -v localhost:5555/tasks
 
 curl localhost:5555/stats | jq .
+
+curl http://localhost:5556/tasks
+
+curl -v --request POST \
+--header 'Content-Type: application/json' \
+--data @task.json \
+localhost:5556/tasks
+
+curl localhost:5556/tasks | jq .

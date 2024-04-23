@@ -6,10 +6,13 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - DOCKER_API_VERSION=1.44
-      - CUBE_HOST=0.0.0.0
-      - CUBE_PORT=5555
+      - CUBE_WORKER_HOST=0.0.0.0
+      - CUBE_WORKER_PORT=5555
+      - CUBE_MANAGER_HOST=0.0.0.0
+      - CUBE_MANAGER_PORT=5556
     ports:
       - "5555:5555"
+      - "5556:5556"
 
   # busybox:
   #   container_name: busybox

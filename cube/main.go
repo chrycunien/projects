@@ -5,12 +5,8 @@ import (
 	"cube/task"
 	"cube/worker"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
-	"time"
-
-	"github.com/google/uuid"
 )
 
 func createContainer() (*task.Docker, *task.DockerResult) {
@@ -46,68 +42,31 @@ func stopContainer(d *task.Docker, id string) *task.DockerResult {
 	return &result
 }
 
-func runTasks(w *worker.Worker) {
-	for {
-		if w.Queue.Len() != 0 {
-			result := w.RunTask()
-			if result.Error != nil {
-				log.Printf("Error running task: %v\n", result.Error)
-			}
-		} else {
-			log.Println("No task to process currently!")
-		}
-
-		log.Println("Sleeping for 10 seconds.")
-		time.Sleep(10 * time.Second)
-	}
-}
-
 // CUBE_HOST=localhost CUBE_PORT=5555 DOCKER_API_VERSION=1.44 go run main.go
 
 func main() {
-	host := os.Getenv("CUBE_HOST")
-	port, _ := strconv.Atoi(os.Getenv("CUBE_PORT"))
+	mhost := os.Getenv("CUBE_MANAGER_HOST")
+	mport, _ := strconv.Atoi(os.Getenv("CUBE_MANAGER_PORT"))
+
+	whost := os.Getenv("CUBE_WORKER_HOST")
+	wport, _ := strconv.Atoi(os.Getenv("CUBE_WORKER_PORT"))
 
 	fmt.Println("Starting Cube Worker...")
 
 	w := worker.NewWorker()
-	api := worker.NewApi(host, port, w)
+	wapi := worker.NewApi(whost, wport, w)
 
-	go runTasks(w)
+	go w.RunTasks()
 	go w.CollectStats()
-	go api.Start()
+	go wapi.Start()
 
-	workers := []string{fmt.Sprintf("%s:%d", host, port)}
+	fmt.Println("Starting Cube Manager...")
+	workers := []string{fmt.Sprintf("%s:%d", whost, wport)}
 	m := manager.New(workers)
+	mapi := manager.NewApi(mhost, mport, m)
 
-	for i := 0; i < 3; i++ {
-		t := task.Task{
-			ID:    uuid.New(),
-			Name:  fmt.Sprintf("test-container-%d", i),
-			State: task.Scheduled,
-			Image: "nginx",
-		}
-		te := task.TaskEvent{
-			ID:    uuid.New(),
-			State: task.Running,
-			Task:  t,
-		}
-		m.AddTask(te)
-		m.SendWork()
-	}
+	go m.ProcessTasks()
+	go m.UpdateTasks()
 
-	go func() {
-		for {
-			fmt.Printf("[Manager] Updating tasks from %d workers\n", len(workers))
-			m.UpdateTasks()
-			time.Sleep(15 * time.Second)
-		}
-	}()
-
-	for {
-		for _, t := range m.TaskDb {
-			fmt.Printf("[Manager] Task: id: %s, state: %d\n", t.ID, t.State)
-			time.Sleep(15 * time.Second)
-		}
-	}
+	mapi.Start()
 }
