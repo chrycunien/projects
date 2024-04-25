@@ -43,3 +43,5 @@ curl -v http://localhost:7777/healthfail
 curl -v -X POST localhost:5556/tasks -d @task1.json
 
 curl http://localhost:5556/tasks | jq .
+
+curl http://localhost:5555/tasks | jq .

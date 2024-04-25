@@ -2,47 +2,11 @@ package main
 
 import (
 	"cube/manager"
-	"cube/task"
 	"cube/worker"
 	"fmt"
 	"os"
 	"strconv"
 )
-
-func createContainer() (*task.Docker, *task.DockerResult) {
-	c := task.Config{
-		Name:  "test-container-1",
-		Image: "postgres:13",
-		Env: []string{
-			"POSTGRES_USER=cube",
-			"POSTGRES_PASSWORD=secret",
-		},
-	}
-
-	d := task.NewDocker(&c)
-
-	result := d.Run()
-	if result.Error != nil {
-		fmt.Printf("Error: %v\n", result.Error)
-		return nil, &result
-	}
-
-	fmt.Printf("Container is %s is running with config: %v\n", result.ContainerID, c)
-	return d, &result
-}
-
-func stopContainer(d *task.Docker, id string) *task.DockerResult {
-	result := d.Stop(id)
-	if result.Error != nil {
-		fmt.Printf("Error: %v\n", result.Error)
-		return &result
-	}
-
-	fmt.Printf("Container %s is stopped and removed\n", id)
-	return &result
-}
-
-// CUBE_HOST=localhost CUBE_PORT=5555 DOCKER_API_VERSION=1.44 go run main.go
 
 func main() {
 	mhost := os.Getenv("CUBE_MANAGER_HOST")
@@ -53,17 +17,37 @@ func main() {
 
 	fmt.Println("Starting Cube Worker...")
 
-	w := worker.NewWorker()
-	wapi := worker.NewApi(whost, wport, w)
+	w1 := worker.NewWorker()
+	wapi1 := worker.NewApi(whost, wport, w1)
 
-	go w.RunTasks()
-	go w.CollectStats()
-	go w.UpdateTasks()
-	go wapi.Start()
+	w2 := worker.NewWorker()
+	wapi2 := worker.NewApi(whost, wport+1, w2)
+
+	w3 := worker.NewWorker()
+	wapi3 := worker.NewApi(whost, wport+2, w3)
+
+	go w1.RunTasks()
+	go w1.CollectStats()
+	go w1.UpdateTasks()
+	go wapi1.Start()
+
+	go w2.RunTasks()
+	go w2.CollectStats()
+	go w2.UpdateTasks()
+	go wapi2.Start()
+
+	go w3.RunTasks()
+	go w3.CollectStats()
+	go w3.UpdateTasks()
+	go wapi3.Start()
 
 	fmt.Println("Starting Cube Manager...")
-	workers := []string{fmt.Sprintf("%s:%d", whost, wport)}
-	m := manager.New(workers)
+	workers := []string{
+		fmt.Sprintf("%s:%d", whost, wport),
+		fmt.Sprintf("%s:%d", whost, wport+1),
+		fmt.Sprintf("%s:%d", whost, wport+2),
+	}
+	m := manager.New(workers, "epvm")
 	mapi := manager.NewApi(mhost, mport, m)
 
 	go m.ProcessTasks()

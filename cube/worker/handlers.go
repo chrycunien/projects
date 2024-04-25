@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"cube/stats"
 	"cube/task"
 	"encoding/json"
 	"fmt"
@@ -13,8 +14,15 @@ import (
 
 func (a *Api) GetStatsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(a.Worker.Stats)
+	if a.Worker.Stats != nil {
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(*a.Worker.Stats)
+		return
+	}
+
+	w.WriteHeader(200)
+	stats := stats.GetStats()
+	json.NewEncoder(w).Encode(stats)
 }
 
 func (a *Api) StartTaskHanlder(w http.ResponseWriter, r *http.Request) {
