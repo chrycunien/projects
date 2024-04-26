@@ -12,28 +12,21 @@ type ErrResponse struct {
 	Message        string
 }
 
-func NewApi(host string, port int, worker *Worker) *Api {
-	return &Api{
-		Host:   host,
-		Port:   port,
-		Worker: worker,
-	}
-}
-
 type Api struct {
-	Host   string
-	Port   int
-	Worker *Worker
-	Router *chi.Mux
+	Address string
+	Port    int
+	Worker  *Worker
+	Router  *chi.Mux
 }
 
-func (a *Api) initRounter() {
+func (a *Api) initRouter() {
 	a.Router = chi.NewRouter()
 	a.Router.Route("/tasks", func(r chi.Router) {
-		r.Post("/", a.StartTaskHanlder)
-		r.Get("/", a.GetTaskHandler)
+		r.Post("/", a.StartTaskHandler)
+		r.Get("/", a.GetTasksHandler)
 		r.Route("/{taskID}", func(r chi.Router) {
 			r.Delete("/", a.StopTaskHandler)
+			r.Get("/", a.InspectTaskHandler)
 		})
 	})
 	a.Router.Route("/stats", func(r chi.Router) {
@@ -42,7 +35,6 @@ func (a *Api) initRounter() {
 }
 
 func (a *Api) Start() {
-	a.initRounter()
-	addr := fmt.Sprintf("%s:%d", a.Host, a.Port)
-	http.ListenAndServe(addr, a.Router)
+	a.initRouter()
+	http.ListenAndServe(fmt.Sprintf("%s:%d", a.Address, a.Port), a.Router)
 }

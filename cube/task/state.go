@@ -1,5 +1,7 @@
 package task
 
+import "log"
+
 type State int
 
 const (
@@ -13,9 +15,9 @@ const (
 var stateTransitionMap = map[State][]State{
 	Pending:   {Scheduled},
 	Scheduled: {Scheduled, Running, Failed},
-	Running:   {Running, Completed, Failed},
+	Running:   {Running, Completed, Failed, Scheduled},
 	Completed: {},
-	Failed:    {},
+	Failed:    {Scheduled},
 }
 
 func Contains(states []State, state State) bool {
@@ -27,6 +29,7 @@ func Contains(states []State, state State) bool {
 	return false
 }
 
-func ValidStateTransision(src, dst State) bool {
+func ValidStateTransition(src State, dst State) bool {
+	log.Printf("attempting to transition from %#v to %#v\n", src, dst)
 	return Contains(stateTransitionMap[src], dst)
 }
