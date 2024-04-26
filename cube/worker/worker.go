@@ -14,10 +14,9 @@ import (
 )
 
 type Worker struct {
-	Name  string
-	Queue queue.Queue
-	Db    store.Store
-	//Db        map[uuid.UUID]*task.Task
+	Name      string
+	Queue     queue.Queue
+	Db        store.Store
 	Stats     *stats.Stats
 	TaskCount int
 }
@@ -75,7 +74,7 @@ func (w *Worker) RunTasks() {
 				log.Printf("Error running task: %v\n", result.Error)
 			}
 		} else {
-			log.Printf("No tasks to process currently.\n")
+			log.Println("No tasks to process currently.")
 		}
 		log.Println("Sleeping for 10 seconds.")
 		time.Sleep(10 * time.Second)
@@ -126,10 +125,10 @@ func (w *Worker) runTask() task.DockerResult {
 			dockerResult = w.StartTask(taskQueued)
 		default:
 			fmt.Printf("This is a mistake. taskPersisted: %v, taskQueued: %v\n", taskPersisted, taskQueued)
-			dockerResult.Error = errors.New("We should not get here")
+			dockerResult.Error = errors.New("we should not get here")
 		}
 	} else {
-		err := fmt.Errorf("Invalid transition from %v to %v", taskPersisted.State, taskQueued.State)
+		err := fmt.Errorf("invalid transition from %v to %v", taskPersisted.State, taskQueued.State)
 		dockerResult.Error = err
 		return dockerResult
 	}

@@ -5,7 +5,6 @@ import (
 	"cube/task"
 	"log"
 	"math"
-	"time"
 )
 
 const (
@@ -83,7 +82,7 @@ func (g *Greedy) Score(t task.Task, nodes []*node.Node) map[string]float64 {
 	nodeScores := make(map[string]float64)
 
 	for _, node := range nodes {
-		cpuUsage, err := calculateCpuUsage(node)
+		cpuUsage, err := node.CalculateCpuUsage()
 		if err != nil {
 			log.Printf("error calculating CPU usage for node %s, skipping: %v", node.Name, err)
 			continue
@@ -131,7 +130,7 @@ func (e *Epvm) Score(t task.Task, nodes []*node.Node) map[string]float64 {
 	maxJobs := 4.0
 
 	for _, node := range nodes {
-		cpuUsage, err := calculateCpuUsage(node)
+		cpuUsage, err := node.CalculateCpuUsage()
 		if err != nil {
 			log.Printf("error calculating CPU usage for node %s, skipping: %v", node.Name, err)
 			continue
@@ -177,7 +176,6 @@ func selectCandidateNodes(t task.Task, nodes []*node.Node) []*node.Node {
 		}
 
 	}
-
 	return candidates
 }
 
@@ -188,57 +186,3 @@ func checkDisk(t task.Task, diskAvailable int64) bool {
 func calculateLoad(usage float64, capacity float64) float64 {
 	return usage / capacity
 }
-
-// See discussion from this StackOverflow thread:
-// https://stackoverflow.com/questions/23367857/accurate-calculation-of-cpu-usage-given-in-percentage-in-linux
-func calculateCpuUsage(node *node.Node) (*float64, error) {
-	//stat1 := getNodeStats(node)
-	stat1, err := node.GetStats()
-	if err != nil {
-		return nil, err
-	}
-	time.Sleep(3 * time.Second)
-	//stat2 := getNodeStats(node)
-	stat2, err := node.GetStats()
-	if err != nil {
-		return nil, err
-	}
-
-	stat1Idle := stat1.CpuStats.Idle + stat1.CpuStats.IOWait
-	stat2Idle := stat2.CpuStats.Idle + stat2.CpuStats.IOWait
-
-	stat1NonIdle := stat1.CpuStats.User + stat1.CpuStats.Nice + stat1.CpuStats.System + stat1.CpuStats.IRQ + stat1.CpuStats.SoftIRQ + stat1.CpuStats.Steal
-	stat2NonIdle := stat2.CpuStats.User + stat2.CpuStats.Nice + stat2.CpuStats.System + stat2.CpuStats.IRQ + stat2.CpuStats.SoftIRQ + stat2.CpuStats.Steal
-
-	stat1Total := stat1Idle + stat1NonIdle
-	stat2Total := stat2Idle + stat2NonIdle
-
-	total := stat2Total - stat1Total
-	idle := stat2Idle - stat1Idle
-
-	var cpuPercentUsage float64
-	if total == 0 && idle == 0 {
-		cpuPercentUsage = 0.00
-	} else {
-		cpuPercentUsage = (float64(total) - float64(idle)) / float64(total)
-	}
-	return &cpuPercentUsage, nil
-}
-
-//func getNodeStats(node *node.Node) *stats.Stats {
-//	url := fmt.Sprintf("%s/stats", node.Api)
-//	resp, err := http.Get(url)
-//	if err != nil {
-//		log.Printf("Error connecting to %v: %v", node.Api, err)
-//	}
-//
-//	if resp.StatusCode != 200 {
-//		log.Printf("Error retrieving stats from %v: %v", node.Api, err)
-//	}
-//
-//	defer resp.Body.Close()
-//	body, _ := ioutil.ReadAll(resp.Body)
-//	var stats stats.Stats
-//	json.Unmarshal(body, &stats)
-//	return &stats
-//}

@@ -19,15 +19,15 @@ func main() {
 
 	w1 := worker.New("worker-1", "persistent")
 	// w1 := worker.New("worker-1", "memory")
-	wapi1 := worker.Api{Address: whost, Port: wport, Worker: w1}
+	wapi1 := worker.Api{Host: whost, Port: wport, Worker: w1}
 
 	w2 := worker.New("worker-2", "persistent")
 	// w2 := worker.New("worker-2", "memory")
-	wapi2 := worker.Api{Address: whost, Port: wport + 1, Worker: w2}
+	wapi2 := worker.Api{Host: whost, Port: wport + 1, Worker: w2}
 
 	w3 := worker.New("worker-3", "persistent")
 	// w3 := worker.New("worker-3", "memory")
-	wapi3 := worker.Api{Address: whost, Port: wport + 2, Worker: w3}
+	wapi3 := worker.Api{Host: whost, Port: wport + 2, Worker: w3}
 
 	go w1.RunTasks()
 	go w1.UpdateTasks()
@@ -51,7 +51,7 @@ func main() {
 	// m := manager.New(workers, "roundrobin")
 	// m := manager.New(workers, "epvm", "memory")
 	m := manager.New(workers, "epvm", "persistent")
-	mapi := manager.Api{Address: mhost, Port: mport, Manager: m}
+	mapi := manager.Api{Host: mhost, Port: mport, Manager: m}
 
 	go m.ProcessTasks()
 	go m.UpdateTasks()

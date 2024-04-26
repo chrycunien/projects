@@ -13,7 +13,7 @@ type ErrResponse struct {
 }
 
 type Api struct {
-	Address string
+	Host    string
 	Port    int
 	Manager *Manager
 	Router  *chi.Mux
@@ -32,5 +32,6 @@ func (a *Api) initRouter() {
 
 func (a *Api) Start() {
 	a.initRouter()
-	http.ListenAndServe(fmt.Sprintf("%s:%d", a.Address, a.Port), a.Router)
+	addr := fmt.Sprintf("%s:%d", a.Host, a.Port)
+	http.ListenAndServe(addr, a.Router)
 }

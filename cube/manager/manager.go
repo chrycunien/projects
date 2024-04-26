@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -19,6 +20,12 @@ import (
 	"github.com/golang-collections/collections/queue"
 	"github.com/google/uuid"
 )
+
+var CubeDeployMode string
+
+func init() {
+	CubeDeployMode = os.Getenv("CUBE_DEPLOY_MODE")
+}
 
 type Manager struct {
 	Pending       queue.Queue
@@ -39,7 +46,6 @@ func New(workers []string, schedulerType string, dbType string) *Manager {
 	var nodes []*node.Node
 	for worker := range workers {
 		workerTaskMap[workers[worker]] = []uuid.UUID{}
-
 		nAPI := fmt.Sprintf("http://%v", workers[worker])
 		n := node.New(workers[worker], nAPI, "worker")
 		nodes = append(nodes, n)
@@ -222,13 +228,14 @@ func (m *Manager) restartTask(t *task.Task) {
 	}
 	data, err := json.Marshal(te)
 	if err != nil {
-		log.Printf("Unable to marshal task object: %v.", t)
+		log.Printf("Unable to marshal task object: %v\n", t)
+		return
 	}
 
 	url := fmt.Sprintf("http://%s/tasks", w)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(data))
 	if err != nil {
-		log.Printf("[manager] Error connecting to %v: %v", w, err)
+		log.Printf("[manager] Error connecting to %v: %v\n", w, err)
 		m.Pending.Enqueue(t)
 		return
 	}
@@ -241,7 +248,7 @@ func (m *Manager) restartTask(t *task.Task) {
 			fmt.Printf("Error decoding response: %s\n", err.Error())
 			return
 		}
-		log.Printf("Response error (%d): %s", e.HTTPStatusCode, e.Message)
+		log.Printf("Response error (%d): %s\n", e.HTTPStatusCode, e.Message)
 		return
 	}
 
@@ -264,14 +271,23 @@ func getHostPort(ports nat.PortMap) *string {
 func (m *Manager) checkTaskHealth(t task.Task) error {
 	log.Printf("Calling health check for task %s: %s\n", t.ID, t.HealthCheck)
 
-	w := m.TaskWorkerMap[t.ID]
 	hostPort := getHostPort(t.HostPorts)
-	worker := strings.Split(w, ":")
 	if hostPort == nil {
 		log.Printf("Have not collected task %s host port yet. Skipping.\n", t.ID)
 		return nil
 	}
-	url := fmt.Sprintf("http://%s:%s%s", worker[0], *hostPort, t.HealthCheck)
+
+	var url string
+	if CubeDeployMode == "local" {
+		// NOTE: this is a trick on mac to work with docker host network
+		// https://stackoverflow.com/questions/31324981/how-to-access-host-port-from-docker-container
+		url = fmt.Sprintf("http://%s:%s%s", "host.docker.internal", *hostPort, t.HealthCheck)
+	} else {
+		w := m.TaskWorkerMap[t.ID]
+		worker := strings.Split(w, ":")
+		url = fmt.Sprintf("http://%s:%s%s", worker[0], *hostPort, t.HealthCheck)
+	}
+
 	log.Printf("Calling health check for task %s: %s\n", t.ID, url)
 	resp, err := http.Get(url)
 	if err != nil {
