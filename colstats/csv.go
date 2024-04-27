@@ -25,17 +25,21 @@ func avg(data []float64) float64 {
 
 func csv2float(r io.Reader, column int) ([]float64, error) {
 	cr := csv.NewReader(r)
+	cr.ReuseRecord = true
+
 	// adjusting for 0 based index
 	column--
 
-	allData, err := cr.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("canno read data from file: %w", err)
-	}
-
 	var data []float64
+	for i := 0; ; i++ {
+		row, err := cr.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("cannot read data from file: %w", err)
+		}
 
-	for i, row := range allData {
 		if i == 0 {
 			continue
 		}

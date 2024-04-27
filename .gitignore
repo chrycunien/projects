@@ -29,3 +29,8 @@ go.work
 
 # Vagrant
 */.vagrant/
+
+# Testdata
+colstats/testdata/benchmark
+colstats/*.test
+colstats/*.pprof
