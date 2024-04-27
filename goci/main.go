@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"os/exec"
+
+	"time"
 )
 
 func main() {
@@ -23,15 +24,53 @@ func run(proj string, out io.Writer) error {
 		return fmt.Errorf("project directory is required: %w", ErrValidation)
 	}
 
-	// errors -> avoid creating file by using a name in standard library
-	args := []string{"build", ".", "errors"}
-	cmd := exec.Command("go", args...)
-	cmd.Dir = proj
+	pipeline := make([]executer, 4)
+	pipeline[0] = newStep(
+		"go build",
+		"go",
+		"Go Build: SUCCESS",
+		proj,
+		// add a standard library as the argument to prevent generating a binary
+		[]string{"build", ".", "errors"},
+	)
 
-	if err := cmd.Run(); err != nil {
-		return &stepErr{step: "go build", msg: "go build failed", cause: err}
+	pipeline[1] = newStep(
+		"go test",
+		"go",
+		"Go Test: SUCCESS",
+		proj,
+		[]string{"test", "-v"},
+	)
+
+	pipeline[2] = newExceptionStep(
+		"go fmt",
+		"gofmt",
+		"Gofmt: SUCCESS",
+		proj,
+		// output failed filenames
+		[]string{"-l", "."},
+	)
+
+	pipeline[3] = newTimeoutStep(
+		"git push",
+		"git",
+		"Git Push: SUCCESS",
+		proj,
+		[]string{"push", "origin", "main"},
+		10*time.Second,
+	)
+
+	for _, s := range pipeline {
+		msg, err := s.execute()
+		if err != nil {
+			return err
+		}
+
+		_, err = fmt.Fprintln(out, msg)
+		if err != nil {
+			return err
+		}
 	}
 
-	_, err := fmt.Fprintln(out, "Go Build: SUCCESS")
-	return err
+	return nil
 }

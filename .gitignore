@@ -34,3 +34,4 @@ go.work
 colstats/testdata/benchmark
 colstats/*.test
 colstats/*.pprof
+goci/goci
