@@ -81,6 +81,8 @@ func (s exceptionStep) execute() (string, error) {
 	return s.message, nil
 }
 
+var command = exec.CommandContext
+
 type timeoutStep struct {
 	step
 	timeout time.Duration
@@ -100,7 +102,8 @@ func (s timeoutStep) execute() (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), s.timeout)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, s.exe, s.args...)
+	// can be used to mock resources in tests
+	cmd := command(ctx, s.exe, s.args...)
 	cmd.Dir = s.proj
 
 	var debug bytes.Buffer
