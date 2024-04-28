@@ -22,30 +22,46 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"fmt"
+	"io"
+	"os"
+	"pscan/scan"
+
 	"github.com/spf13/cobra"
 )
 
-// hostsCmd represents the hosts command
-var hostsCmd = &cobra.Command{
-	Use:   "hosts",
-	Short: "Manage the hosts list",
-	Long: `Manages the hosts lists for pscan
-	
-Add hosts with the add command
-Delete hosts with the delete command
-List hosts with the list command.`,
+// deleteCmd represents the delete command
+var deleteCmd = &cobra.Command{
+	Use:          "delete <host 1>...<host n>",
+	Aliases:      []string{"d"},
+	Short:        "Delete host(s) from list",
+	SilenceUsage: true,
+	Args:         cobra.MinimumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		hostsFile, err := cmd.Flags().GetString("hosts-file")
+		if err != nil {
+			return err
+		}
+		return deleteAction(os.Stdout, hostsFile, args)
+	},
 }
 
 func init() {
-	rootCmd.AddCommand(hostsCmd)
+	hostsCmd.AddCommand(deleteCmd)
+}
 
-	// Here you will define your flags and configuration settings.
+func deleteAction(out io.Writer, hostsFile string, args []string) error {
+	hl := &scan.HostsList{}
+	if err := hl.Load(hostsFile); err != nil {
+		return err
+	}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// hostsCmd.PersistentFlags().String("foo", "", "A help for foo")
+	for _, h := range args {
+		if err := hl.Remove(h); err != nil {
+			return err
+		}
+		fmt.Fprintln(out, "Deleted host:", h)
+	}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// hostsCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	return hl.Save(hostsFile)
 }

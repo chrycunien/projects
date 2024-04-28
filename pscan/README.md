@@ -12,4 +12,7 @@ go install github.com/spf13/cobra-cli@latest
 cobra-cli init
 cobra-cli add <command>
 # ex: cobra-init add hosts
+
+# specify the parent of the new command
+cobra-cli add list -p hostsCmd
 ```
