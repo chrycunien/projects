@@ -25,39 +25,39 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"pscan/scan"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
+	"github.com/spf13/cobra/doc"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Aliases: []string{"l"},
-	Use:     "list",
-	Short:   "List hosts in hosts list",
+// docsCmd represents the docs command
+var docsCmd = &cobra.Command{
+	Use:   "docs",
+	Short: "Generate documentation for your command",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		hostsFile := viper.GetString("hosts-file")
-		return listAction(os.Stdout, hostsFile, args)
+		dir, err := cmd.Flags().GetString("dir")
+		if err != nil {
+			return err
+		}
+		if dir == "" {
+			if dir, err = os.MkdirTemp("", "pscan"); err != nil {
+				return err
+			}
+		}
+		return docsAction(os.Stdout, dir)
 	},
 }
 
 func init() {
-	hostsCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(docsCmd)
+	docsCmd.Flags().StringP("dir", "d", "", "Destination directory for docs")
 }
 
-func listAction(out io.Writer, hostsFile string, args []string) error {
-	hl := &scan.HostsList{}
-
-	if err := hl.Load(hostsFile); err != nil {
+func docsAction(out io.Writer, dir string) error {
+	if err := doc.GenMarkdownTree(rootCmd, dir); err != nil {
 		return err
 	}
 
-	for _, h := range hl.Hosts {
-		if _, err := fmt.Fprintln(out, h); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	_, err := fmt.Fprintf(out, "Documentation successfully created in %s\n", dir)
+	return err
 }

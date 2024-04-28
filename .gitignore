@@ -35,3 +35,5 @@ colstats/testdata/benchmark
 colstats/*.test
 colstats/*.pprof
 goci/goci
+pscan/pscan
+pscan/docs/

@@ -22,42 +22,31 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
 	"io"
 	"os"
-	"pscan/scan"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
-	Aliases: []string{"l"},
-	Use:     "list",
-	Short:   "List hosts in hosts list",
+// completionCmd represents the completion command
+var completionCmd = &cobra.Command{
+	Use:   "completion",
+	Short: "Generate zsh completion for your command",
+	Long: `To load your completions run source <(pscan completion)
+	
+To load completions automatically on login, add this line to your .zshrc file:
+$ ~/.zshrc
+source <(pscan completion)
+`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		hostsFile := viper.GetString("hosts-file")
-		return listAction(os.Stdout, hostsFile, args)
+		return completionAction(os.Stdout)
 	},
 }
 
 func init() {
-	hostsCmd.AddCommand(listCmd)
+	rootCmd.AddCommand(completionCmd)
 }
 
-func listAction(out io.Writer, hostsFile string, args []string) error {
-	hl := &scan.HostsList{}
-
-	if err := hl.Load(hostsFile); err != nil {
-		return err
-	}
-
-	for _, h := range hl.Hosts {
-		if _, err := fmt.Fprintln(out, h); err != nil {
-			return err
-		}
-	}
-
-	return nil
+func completionAction(out io.Writer) error {
+	return rootCmd.GenZshCompletion(out)
 }
