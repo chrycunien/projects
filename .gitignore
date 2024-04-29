@@ -37,3 +37,5 @@ colstats/*.pprof
 goci/goci
 pscan/pscan
 pscan/docs/
+todoserver/todoserver
+todoclient/todoclient
