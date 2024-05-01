@@ -1,5 +1,3 @@
-//go:build !inmemory
-
 package cmd
 
 import (
@@ -14,5 +12,6 @@ func getRepo() (pomodoro.Repository, error) {
 	if err != nil {
 		return nil, err
 	}
-	return repo, err
+
+	return repo, nil
 }
