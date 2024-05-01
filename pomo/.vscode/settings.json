@@ -1,0 +1,6 @@
+{
+    "gopls": {
+        "build.buildFlags": ["-tags", "inmemory"]
+    },
+    "go.useLanguageServer": true,
+}
