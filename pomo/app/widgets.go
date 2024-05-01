@@ -20,7 +20,30 @@ type widgets struct {
 	updateTxtType  chan string
 }
 
+func (w *widgets) update(timer []int, txtType, txtInfo, txtTimer string,
+	redrawCh chan<- bool) {
+
+	if txtInfo != "" {
+		w.updateTxtInfo <- txtInfo
+	}
+
+	if txtType != "" {
+		w.updateTxtType <- txtType
+	}
+
+	if txtTimer != "" {
+		w.updateTxtTimer <- txtTimer
+	}
+
+	if len(timer) > 0 {
+		w.updateDonTimer <- timer
+	}
+
+	redrawCh <- true
+}
+
 func newWidgets(ctx context.Context, errorCh chan<- error) (*widgets, error) {
+
 	w := &widgets{}
 	var err error
 
@@ -52,29 +75,15 @@ func newWidgets(ctx context.Context, errorCh chan<- error) (*widgets, error) {
 	return w, nil
 }
 
-func (w *widgets) update(timer []int, txtType, txtInfo, txtTimer string, redrawCh chan<- bool) {
-	if txtInfo != "" {
-		w.updateTxtInfo <- txtInfo
-	}
-	if txtType != "" {
-		w.updateTxtType <- txtType
-	}
-	if txtTimer != "" {
-		w.updateTxtTimer <- txtTimer
-	}
-	if len(timer) > 0 {
-		w.updateDonTimer <- timer
-	}
+func newText(ctx context.Context, updateText <-chan string,
+	errorCh chan<- error) (*text.Text, error) {
 
-	redrawCh <- true
-}
-
-func newText(ctx context.Context, updateText <-chan string, errorCh chan<- error) (*text.Text, error) {
 	txt, err := text.New()
 	if err != nil {
 		return nil, err
 	}
 
+	// Goroutine to update Text
 	go func() {
 		for {
 			select {
@@ -90,15 +99,19 @@ func newText(ctx context.Context, updateText <-chan string, errorCh chan<- error
 	return txt, nil
 }
 
-func newDonut(ctx context.Context, donUpdater <-chan []int, errorCh chan<- error) (*donut.Donut, error) {
+func newDonut(ctx context.Context, donUpdater <-chan []int,
+	errorCh chan<- error) (*donut.Donut, error) {
+
 	don, err := donut.New(
 		donut.Clockwise(),
 		donut.CellOpts(cell.FgColor(cell.ColorBlue)),
 	)
+
 	if err != nil {
 		return nil, err
 	}
 
+	// Goroutine to update Donut
 	go func() {
 		for {
 			select {
@@ -115,12 +128,15 @@ func newDonut(ctx context.Context, donUpdater <-chan []int, errorCh chan<- error
 	return don, nil
 }
 
-func newSegmentDisplay(ctx context.Context, updateText <-chan string, errorCh chan<- error) (*segmentdisplay.SegmentDisplay, error) {
+func newSegmentDisplay(ctx context.Context, updateText <-chan string,
+	errorCh chan<- error) (*segmentdisplay.SegmentDisplay, error) {
+
 	sd, err := segmentdisplay.New()
 	if err != nil {
 		return nil, err
 	}
 
+	// Goroutine to update SegmentDisplay
 	go func() {
 		for {
 			select {

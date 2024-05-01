@@ -22,6 +22,7 @@ type App struct {
 
 func New(config *pomodoro.IntervalConfig) (*App, error) {
 	ctx, cancel := context.WithCancel(context.Background())
+
 	quitter := func(k *terminalapi.Keyboard) {
 		if k.Key == 'q' || k.Key == 'Q' {
 			cancel()
@@ -36,7 +37,12 @@ func New(config *pomodoro.IntervalConfig) (*App, error) {
 		return nil, err
 	}
 
-	b, err := newButtonSet(ctx, config, w, redrawCh, errorCh)
+	s, err := newSummary(ctx, config, redrawCh, errorCh)
+	if err != nil {
+		return nil, err
+	}
+
+	b, err := newButtonSet(ctx, config, w, s, redrawCh, errorCh)
 	if err != nil {
 		return nil, err
 	}
@@ -46,14 +52,13 @@ func New(config *pomodoro.IntervalConfig) (*App, error) {
 		return nil, err
 	}
 
-	c, err := newGrid(b, w, term)
+	c, err := newGrid(b, w, s, term)
 	if err != nil {
 		return nil, err
 	}
 
 	controller, err := termdash.NewController(term, c,
-		termdash.KeyboardSubscriber(quitter),
-	)
+		termdash.KeyboardSubscriber(quitter))
 	if err != nil {
 		return nil, err
 	}
