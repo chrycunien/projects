@@ -1,8 +1,10 @@
 # Astra: A Simple Go Instrumentation Tool
 
+## Introduction
+
 ## Requirements
 
-## Usage 
+## Usage
 
 ## References
 - https://hackernoon.com/go-the-complete-guide-to-profiling-your-code-h51r3waz
@@ -24,3 +26,12 @@
 - https://pkg.go.dev/go/ast
 - https://pkg.go.dev/golang.org/x/tools@v0.21.0/go/packages
 - https://pkg.go.dev/golang.org/x/tools@v0.21.0/go/analysis
+- https://github.com/dave/dst
+
+## Appendix
+
+### Specification
+- `//astra:decorate [options]`
+- `//astra:generate [options]`
+
+### Related Works
