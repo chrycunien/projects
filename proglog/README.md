@@ -13,4 +13,17 @@ go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 # dependencies for generated code
 go get google.golang.org/grpc@latest
+go get github.com/grpc-ecosystem/go-grpc-middleware
+```
+
+- TLS certificates
+```bash
+go install github.com/cloudflare/cfssl/cmd/cfssl@latest
+
+go install github.com/cloudflare/cfssl/cmd/cfssljson@latest
+```
+
+- ACL
+```bash
+go get github.com/casbin/casbin
 ```
