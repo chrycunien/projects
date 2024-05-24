@@ -51,7 +51,7 @@ endif
 OPERATOR_SDK_VERSION ?= v1.34.2
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+IMG ?= weiserchen/evm:latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.28.3
 
@@ -306,3 +306,9 @@ catalog-build: opm ## Build a catalog image.
 .PHONY: catalog-push
 catalog-push: ## Push a catalog image.
 	$(MAKE) docker-push IMG=$(CATALOG_IMG)
+
+# ===
+# custom commands
+.PHONY: update
+update: manifests generate docker-build docker-push install deploy
+	kubectl rollout restart deployment evmop-controller-manager -n evmop-system

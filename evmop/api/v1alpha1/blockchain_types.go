@@ -20,16 +20,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
-
-// BlockchainSpec defines the desired state of Blockchain
+// BlockchainSpec defines the desired state of Blockchain (StatefulSet)
 type BlockchainSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// number of pod replicas to run
+	Replicas *int32 `json:"replicas,omitempty"`
 
-	// Foo is an example field of Blockchain. Edit blockchain_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// url to the Docker image of the client blockchain to run
+	Image string `json:"image,omitempty"`
+
+	// arguments that will be passed to the client container
+	ClientArgs []string `json:"client-args,omitempty"`
+
+	// entry point for the main blockchain client container
+	Command []string `json:"command,omitempty"`
 }
 
 // BlockchainStatus defines the observed state of Blockchain

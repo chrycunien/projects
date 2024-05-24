@@ -18,11 +18,11 @@ package controller
 
 import (
 	"context"
+	"log"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 
 	learnv1alpha1 "evmop/api/v1alpha1"
 )
@@ -47,9 +47,26 @@ type BlockchainReconciler struct {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *BlockchainReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+	log.SetPrefix("BlockchainReconciler")
 
-	// TODO(user): your logic here
+	blockchain := &learnv1alpha1.Blockchain{}
+	err := r.Get(ctx, req.NamespacedName, blockchain)
+	if err != nil {
+		return ctrl.Result{}, nil
+	}
+
+	log.Println("namespace", blockchain.Namespace, blockchain.GetNamespace(), req.NamespacedName)
+	log.Println("name", blockchain.Name)
+	log.Println("replicas", *blockchain.Spec.Replicas)
+	log.Println("image", blockchain.Spec.Image)
+
+	for _, value := range blockchain.Spec.Command {
+		log.Printf("command %s\n", value)
+	}
+
+	for _, value := range blockchain.Spec.ClientArgs {
+		log.Printf("ClientArgs %s\n", value)
+	}
 
 	return ctrl.Result{}, nil
 }

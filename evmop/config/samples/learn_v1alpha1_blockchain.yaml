@@ -8,5 +8,13 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     app.kubernetes.io/created-by: evmop
   name: blockchain-sample
+  namespace: ethereum
 spec:
-  # TODO(user): Add fields here
+  replicas: 1
+  image: ethereum/client-go:stable
+  command: ['geth']
+  client-args:
+    - '--goerli'
+    - '--syncmode=light'
+    - '--cache=128'
+    - '--datadir=data'
