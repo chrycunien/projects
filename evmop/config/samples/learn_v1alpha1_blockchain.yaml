@@ -1,0 +1,12 @@
+apiVersion: learn.gocrazy.com/v1alpha1
+kind: Blockchain
+metadata:
+  labels:
+    app.kubernetes.io/name: blockchain
+    app.kubernetes.io/instance: blockchain-sample
+    app.kubernetes.io/part-of: evmop
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: evmop
+  name: blockchain-sample
+spec:
+  # TODO(user): Add fields here
