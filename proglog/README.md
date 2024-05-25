@@ -27,3 +27,10 @@ go install github.com/cloudflare/cfssl/cmd/cfssljson@latest
 ```bash
 go get github.com/casbin/casbin
 ```
+
+- Logging
+```bash
+go get go.uber.org/zap
+go get go.opencensus.io
+go get github.com/grpc-ecosystem/go-grpc-middleware/logging/zap
+```

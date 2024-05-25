@@ -59,6 +59,10 @@ policy:
 	cp test/model.conf $(CONFIG_PATH)/model.conf
 	cp test/policy.csv $(CONFIG_PATH)/policy.csv
 
-.PHONY: test
-test: policy
-	go test -v -race ./...
+.PHONY: test-log
+test-log: policy
+	go test -race ./internal/log
+
+.PHONY: test-server
+test-server: policy
+	go test -race ./internal/server -v -debug=true
