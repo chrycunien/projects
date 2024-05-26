@@ -40,3 +40,11 @@ go get github.com/grpc-ecosystem/go-grpc-middleware/logging/zap
 go get github.com/hashicorp/serf/serf
 go get github.com/travisjeffery/go-dynaport
 ```
+
+- Consensus
+```bash
+go get github.com/hashicorp/raft
+go mod edit -replace github.com/hashicorp/raft-boltdb=github.com/travisjeffery/raft-boltdb@v1.0.0
+go get github.com/hashicorp/raft-boltdb
+go get github.com/soheilhy/cmux
+```

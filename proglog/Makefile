@@ -54,14 +54,12 @@ gencert:
 
 	mv *.pem *.csr ${CONFIG_PATH}
 
-.PHONY: policy
-policy:
 	cp test/model.conf $(CONFIG_PATH)/model.conf
 	cp test/policy.csv $(CONFIG_PATH)/policy.csv
 
 .PHONY: test
 test:
-	go test -race -v ./...
+	go test -race -v -count=1 ./...
 
 .PHONY: test-log
 test-log: policy
