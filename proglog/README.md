@@ -71,4 +71,7 @@ mkdir deploy && cd deploy
 helm create proglog
 helm template proglog
 rm proglog/templates/**/*.yaml proglog/templates/NOTES.txt
+
+helm install proglog deploy/proglog
+helm uninstall proglog
 ```
