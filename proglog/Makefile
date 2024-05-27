@@ -1,4 +1,9 @@
 CONFIG_PATH=${HOME}/.proglog/
+TAG ?= 0.0.1
+
+.PHONY: build-docker
+build-docker:
+	docker build -t weiserchen/proglog:$(TAG) .
 
 .PHONY: clean
 clean:
