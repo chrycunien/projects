@@ -312,3 +312,8 @@ catalog-push: ## Push a catalog image.
 .PHONY: update
 update: manifests generate docker-build docker-push install deploy
 	kubectl rollout restart deployment evmop-controller-manager -n evmop-system
+
+.PHONY: health-check
+health-check:
+	docker build -t weiserchen/evmop-health-check:latest ./healthcheck
+	docker push weiserchen/evmop-health-check:latest

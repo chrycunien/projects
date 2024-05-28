@@ -13,6 +13,7 @@ import (
 	apiResource "k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -165,27 +166,52 @@ func (r *BlockchainReconciler) ReconcileStatefulSet(b *learnv1alpha1.Blockchain)
 					Labels: b.ObjectMeta.Labels,
 				},
 				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{{
-						Image:           b.Spec.Image,
-						ImagePullPolicy: "Always",
-						Name:            "app",
-						Command:         b.Spec.Command,
-						Args:            b.Spec.ClientArgs,
-						Ports: []corev1.ContainerPort{{
-							ContainerPort: 30303,
-							Name:          "p2p",
-							Protocol:      "TCP",
-						}, {
-							ContainerPort: b.Spec.ApiPort,
-							Name:          "api",
-							Protocol:      "TCP",
-						}},
-						Resources: *reqs,
-						VolumeMounts: []corev1.VolumeMount{{
-							Name:      "data",
-							MountPath: "/data",
-						}},
-					}},
+					Containers: []corev1.Container{
+						{
+							Image:           b.Spec.Image,
+							ImagePullPolicy: "Always",
+							Name:            "app",
+							Command:         b.Spec.Command,
+							Args:            b.Spec.ClientArgs,
+							Ports: []corev1.ContainerPort{{
+								ContainerPort: 30303,
+								Name:          "p2p",
+								Protocol:      "TCP",
+							}, {
+								ContainerPort: b.Spec.ApiPort,
+								Name:          "api",
+								Protocol:      "TCP",
+							}},
+							Resources: *reqs,
+							VolumeMounts: []corev1.VolumeMount{{
+								Name:      "data",
+								MountPath: "/data",
+							}},
+						},
+						{
+							Image:           "weiserchen/evmop-health-check:latest",
+							ImagePullPolicy: "Always",
+							Name:            "health-check",
+							Ports: []v1.ContainerPort{{
+								ContainerPort: 8080,
+								Name:          "readiness",
+								Protocol:      "TCP",
+							}},
+							ReadinessProbe: &v1.Probe{
+								ProbeHandler: v1.ProbeHandler{
+									HTTPGet: &v1.HTTPGetAction{
+										Path: "/readiness",
+										Port: intstr.IntOrString{
+											IntVal: 8080,
+										},
+									},
+								},
+								PeriodSeconds:    5,
+								SuccessThreshold: 3,
+								FailureThreshold: 3,
+							},
+						},
+					},
 				},
 			},
 			VolumeClaimTemplates: []v1.PersistentVolumeClaim{
