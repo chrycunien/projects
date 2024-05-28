@@ -33,6 +33,15 @@ type BlockchainSpec struct {
 
 	// entry point for the main blockchain client container
 	Command []string `json:"command,omitempty"`
+
+	// number of cpus to allocate to the main blockchain container
+	Cpu string `json:"cpu,omitempty"`
+
+	// memory to allocate to the main blockchain container
+	Memory string `json:"memory,omitempty"`
+
+	// container port for the json-rpc api
+	ApiPort int32 `json:"api-port,omitempty"`
 }
 
 // BlockchainStatus defines the observed state of Blockchain

@@ -15,6 +15,9 @@ spec:
   command: ['geth']
   client-args:
     - '--goerli'
-    - '--syncmode=light'
+    - '--syncmode=snap'
     - '--cache=128'
     - '--datadir=data'
+    - '--http'
+    - '--http.api=eth,net,web3'
+    - '--log.debug=true'

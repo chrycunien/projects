@@ -34,6 +34,10 @@ spec:
           spec:
             description: BlockchainSpec defines the desired state of Blockchain (StatefulSet)
             properties:
+              api-port:
+                description: container port for the json-rpc api
+                format: int32
+                type: integer
               client-args:
                 description: arguments that will be passed to the client container
                 items:
@@ -44,8 +48,14 @@ spec:
                 items:
                   type: string
                 type: array
+              cpu:
+                description: number of cpus to allocate to the main blockchain container
+                type: string
               image:
                 description: url to the Docker image of the client blockchain to run
+                type: string
+              memory:
+                description: memory to allocate to the main blockchain container
                 type: string
               replicas:
                 description: number of pod replicas to run
