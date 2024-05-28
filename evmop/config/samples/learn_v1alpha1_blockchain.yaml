@@ -13,6 +13,8 @@ spec:
   replicas: 1
   image: ethereum/client-go:stable
   command: ['geth']
+  cpu: '500m'
+  memory: '1Gi'
   client-args:
     - '--goerli'
     - '--syncmode=snap'
